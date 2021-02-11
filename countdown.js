@@ -8,6 +8,8 @@ let isPaused = true;
 let countdownWasStarted = false;
 let pomodoroDuration = minutes_50; //by default
 let timeLeftInSeconds = 0;
+let isEditing = false;
+let timeString;
 
 // Button Handlers
 function updateDuration() {
@@ -115,4 +117,51 @@ function playYoScott() {
   yoScottAudio.play();
 
   document.getElementById("countdown").innerHTML = "YOO";
+}
+
+function editCountdown(e) {
+  if(isEditing) {
+    return;
+  }
+
+  if (!isPaused) {
+    playPauseCountdown();
+  }
+
+  isEditing = true;
+  timeString = e.innerHTML;
+  e.innerHTML = '<input id="countdown-input" oninput="validateCountdown(this)" onfocusout="saveCountdown(this)" onclick="highlightInput(this)" type="text" style="width:' + e.offsetWidth + 'px" value="' + e.innerText + '">';
+  tInput = document.getElementById("countdown-input");
+  tInput.focus();
+  tInput.setSelectionRange(0, tInput.value.search(':'))
+}
+
+function validateCountdown(e){
+  if (e.value.search(":") < 1) {
+    e.value = timeString;
+    return
+  }
+
+  var minutes = parseInt(e.value.substring(0, e.value.search(":")))
+  var seconds = parseInt(e.value.substring(e.value.search(":") + 1, e.value.length));
+
+  if (Number.isNaN(minutes) || Number.isNaN(seconds)) {
+    e.value = timeString;
+    return;
+  }
+  timeLeftInSeconds = minutes * 60 + seconds;
+  pomodoroDuration = timeLeftInSeconds;
+}
+
+function saveCountdown(e) {
+  isEditing = false;
+}
+
+function highlightInput(e) {
+  var colon = e.value.search(":");
+  if (e.selectionStart < colon) {
+    tInput.setSelectionRange(0, tInput.value.search(':'))
+  } else {
+    tInput.setSelectionRange(tInput.value.search(':') + 1, tInput.value.length);
+  }
 }
